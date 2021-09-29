@@ -1,0 +1,6 @@
+# Python bytecode files can be omitted
+*.pyc
+# Vscode custom settings
+.vscode
+# Captured Requirement Plan
+needed.jpg
