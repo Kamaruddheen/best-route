@@ -1,4 +1,4 @@
 django==3.1.1
-django-crispy-forms==1.9.2
+django-crispy-forms>=1.13.0
 # livereload not for production
 django-livereload-server==0.3.2

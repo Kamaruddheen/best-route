@@ -1,4 +1,5 @@
 {% load static %}
+{% load crispy_forms_tags %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -38,13 +39,95 @@
     </header>
 
     <main>
-        <h1>Hello, world!</h1>
+        <article>
+            <section class="container my-5">
+                <form class="form form-row needs-validation" action="{% url 'homepage' %}" method="POST"
+                    id="add_csv_form" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    <div class="form-group col-md-4">
+                        {{ csv_form.input_file|as_crispy_field }}
+                    </div>
+                    <div class="form-group col-md-12">
+                        <input type="submit" name="add_csv_form" form="add_csv_form"
+                            class="btn btn-primary align-self-center" value="Submit">
+                    </div>
+                </form>
+            </section>
+            <div id="da"></div>
+            <section class="container my-3 table-responsive">
+                <table class="table table-hover table-striped" id="table_csv_viewer">
+                    <thead class="table-light">
+                        <tr>
+                            {% for header in title %}
+                            <th scope="col">{{ header }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in initial %}
+                        <tr>
+                            {% for col in row %}
+                            <td>{{ col }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+        </article>
     </main>
 
-    <footer>
-        <!-- Footer -->
-        {% include 'footer.html' %}
-    </footer>
+    <script>
+        $(document).ready(function () {
+            // Raw CSV viewer  
+            $("#id_input_file").change(function () {
+                var regex = /^([a-zA-Z0-9\s_\\.\-:])+(.csv)$/;
+                //Checks whether the file is a valid csv file    
+                if (regex.test($("#id_input_file").val().toLowerCase())) {
+                    //Checks whether the browser supports HTML5    
+                    if (typeof (FileReader) != "undefined") {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            var thead = $("#table_csv_viewer > thead");
+                            var tbody = $("#table_csv_viewer > tbody");
+                            //Splitting of Rows in the csv file    
+                            var csvrows = e.target.result.split("\n");
+                            for (var i = 0; i < csvrows.length; i++) {
+                                // Header
+                                if (i == 0) {
+                                    var row = "<tr>";
+                                    var csvcols = csvrows[i].split(",");
+                                    // Looping through each header cell in a csv row    
+                                    for (var j = 0; j < csvcols.length; j++) {
+                                        row += "<th>" + csvcols[j].toUpperCase() + "</th>";
+                                    }
+                                    row += "</tr>";
+                                    thead.append(row);
+                                    continue
+                                }
+                                // Body
+                                if (csvrows[i] != "") {
+                                    var row = "<tr>";
+                                    var csvcols = csvrows[i].split(",");
+                                    //Looping through each cell in a csv row    
+                                    for (var j = 1; j < csvcols.length - 1; j = j + 2) {
+                                        row += "<td>" + csvcols[j - 1].replace(/\"/g, "") + "," + csvcols[j].replace(/\"/g, "") + "</td>";
+                                    }
+                                    row += "</tr>";
+                                    tbody.append(row);
+                                }
+                            }
+                            $('#table_raw_csv_viewer').show();
+                        }
+                        reader.readAsText($("#id_input_file")[0].files[0]);
+                    } else {
+                        alert("Sorry! Your browser does not support HTML5!");
+                    }
+                }
+            });
+        });
+    </script>
+
 </body>
 
 </html>

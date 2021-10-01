@@ -39,9 +39,12 @@ INSTALLED_APPS = [
     'livereload',  # livereload for development purpose only
     'django.contrib.staticfiles',
     'crispy_forms',
+    "crispy_bootstrap5",
 ]
 
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
+CRISPY_TEMPLATE_PACK = 'bootstrap5'
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -128,9 +131,9 @@ STATICFILES_DIRS = [BASE_DIR/"static/", ]
 STATIC_URL = '/static/'
 
 MESSAGE_TAGS = {
-    messages.DEBUG: 'text-info',
-    messages.INFO: 'text-info',
-    messages.SUCCESS: 'text-success',
-    messages.WARNING: 'text-warning',
-    messages.ERROR: 'text-danger',
+    messages.DEBUG: 'alert-info',
+    messages.INFO: 'alert-info',
+    messages.SUCCESS: 'alert-success',
+    messages.WARNING: 'alert-warning',
+    messages.ERROR: 'alert-danger',
 }
