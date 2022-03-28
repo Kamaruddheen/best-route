@@ -20,4 +20,5 @@ from .views import *
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', homepage, name="homepage"),
+    # path('upload/', csv_viewer, name="csv_viewer"),
 ]

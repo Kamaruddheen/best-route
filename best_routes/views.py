@@ -1,5 +1,4 @@
-from django.http.response import JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 from django.contrib import messages
 from .forms import AddDocumentCSVForm
 
@@ -39,9 +38,9 @@ def homepage(request):
                         csv_reader.fieldnames[i] += " (m)"
                 # print(csv_reader.fieldnames)
                 for row in csv_reader:
-                    start = list(map(float, row['START'].strip().split(',')))
-                    end = list(map(float, row['END'].strip().split(',')))
-                    distance, time = send_api_request(start, end)
+                    # start = list(map(float, row['START'].strip().split(',')))
+                    # end = list(map(float, row['END'].strip().split(',')))                    
+                    distance, time = send_api_request(row['START'], row['END'])
 
                     initial.append((row['START'], row['END'],
                                     distance, time))
@@ -57,7 +56,52 @@ def homepage(request):
     return render(request, 'index.html', context=context)
 
 
-def send_api_request(start, end):
+def find_coordinates(str):
+    URL = "https://api.mapbox.com/geocoding/v5/mapbox.places/{}.json".format(
+        str)
+
+    # defining a pfarams dict for the parameters to be sent to the API
+    PARAMS = {
+        'limit': 1,
+        'worldview': 'in',
+        'country': 'in',
+        'access_token': 'pk.eyJ1IjoiLS1rYW1hci0tIiwiYSI6ImNrdTN6dDV5NzE5dzkycG8xdHNjbWkxZ2oifQ._Th_HdJY6BcVKrzj-UsebA',
+    }
+
+    # Setting verify to False will diable SSL certificate
+    r = requests.get(url=URL, params=PARAMS, verify=False)
+
+    raw_data = r.json()
+
+    # Checking wheather any route is availabe or not
+    try:
+        if raw_data['message'] == "Not Found":
+            return "NA"
+    except KeyError:
+        pass
+
+    # Checking wheather route is empty or not
+    try:
+        if raw_data['features'] == []:
+            return "NA"
+    except KeyError:
+        pass
+
+    data = raw_data['features'][0]['geometry']['coordinates']
+
+    return data
+
+
+def send_api_request(start1, end1):
+
+    start = find_coordinates(start1)
+    end = find_coordinates(end1)
+
+    print(start[0], start[1], end[0], end[1])
+
+    if start == "NA" or end == "NA":
+        return ["NA", "NA"]
+
     URL = "https://api.mapbox.com/directions/v5/mapbox/driving/{},{};{},{}".format(
         start[0], start[1], end[0], end[1]
     )
@@ -75,7 +119,8 @@ def send_api_request(start, end):
 
     # Checking wheather any route is availabe or not
     if raw_data['code'] == "NoRoute":
-        return raw_data['message']
+        print(raw_data['message'])
+        return [raw_data['message'], raw_data['message']]
 
     # Initializing distance and time
     distance = raw_data['routes'][0]['distance']
